@@ -1,24 +1,15 @@
 import tkinter as tk
+import pygame as pg
+import time
 
 #middleC = 60
 majorIndicator = [True, False, True, False, True, True, False, True, False, True, False, True]
 majorText = "CDEFGAB"
+minorText = ["C#/D♭","D#/E♭","F#/G♭","G#/A♭","A#/B♭"]
+noteText = "C Db D Db E F Gb G Ab A Bb B".split(" ")
 
 def isMajor(x):
     return majorIndicator[((x%12)+12)%12]
-
-class GenNote:
-    def __init__(self, startingNote):
-        self.note = startingNote
-        self.isMajor = isMajor(self.note)
-    
-    def nextNote(self):
-        incre = 1
-        while not(isMajor(self.note)==isMajor(self.note+incre)):
-            incre += 1
-        self.note += incre
-        return self.note
-
 
 class Application(tk.Frame):
     def __init__(self, master=None):
@@ -41,15 +32,48 @@ class Application(tk.Frame):
 
     def say_hi(self):
         print("hi there, everyone!")
+    
 
 root = tk.Tk()
-root.geometry("600x1200")
+root.geometry("1000x400")
 app = Application(master=root)
-major = GenNote(60-12-1)
+
+def convToNote(note):
+    return noteText[note%12]+str(note//12)
+
+pg.mixer.init()
+pg.init()
+pg.mixer.set_num_channels(50)
+
+def playNote(note):
+    print(convToNote(note))
+    pg.mixer.music.load("Notes/{}.wav".format(convToNote(note)))
+    pg.mixer.music.play()
+    pg.mixer.music.unload()
+    # wave_obj = sa.WaveObject.from_wave_file("Notes/{}.wav".format(convToNote(note)))
+    # play_obj = wave_obj.play()
+    # time.sleep(1)
+    # play_obj.stop()
+
 notes = {}
-for i in range(17):
-    n = major.nextNote()
-    b = tk.Button(text=majorText[i%7],height=10,width=5,bg="#FFFFFF").place(x=50+50*i,y=50)
+majorNotes = [36,38,40,41,43,45,47,48,50,52,53,55,57,59,60,62,64]
+for i in range(len(majorNotes)):
+    n = majorNotes[i]
+    # print(n,majorText[i%7])
+    b = tk.Button(text=majorText[i%7],height=10,width=5,bg="white",anchor="s",command=lambda: playNote(majorNotes[i]))
+    b.place(x=50+50*i,y=50)
     notes[n] = b
-minor = GenNote(60-1)
+    del b
+extra = 0
+minorNotes = [37,39,42,44,46,49,51,54,56,58,61,63]
+for i in range(len(minorNotes)):
+    n = minorNotes[i]
+    # print(n,minorText[i%5])
+    b = tk.Button(text=minorText[i%5],height=5,width=5,bg="white",command=lambda: playNote(n))
+    extra += isMajor(n-2)
+    # print(extra)
+    b.place(x=25+50*(i+extra),y=50)
+    notes[n] = b
+    del b
+playNote(36)
 app.mainloop()

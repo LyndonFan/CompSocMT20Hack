@@ -1,3 +1,5 @@
 *.aiff
 .DS_Store
 *.wav
+__pycache__
+__pycache__/*
